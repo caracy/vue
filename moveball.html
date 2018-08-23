@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>绚丽小球</title>
+    <style lang="text/css">
+        div{
+            width:1000px;
+            height: 600px;
+            margin:100px auto;
+        }
+        canvas {
+            box-shadow: 0 0 10px #000;
+        }
+    </style>
+</head>
+<body>
+    <div><canvas id="canvas">您的浏览器不支持该版本！</canvas></div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1000;
+        canvas.height = 600;
+        canvas.style.background = '#000';
+
+        //小球
+        class Ball{
+            constructor(x,y,color){
+                this.x = x,
+                this.y = y,
+                this.color =color;
+                this.r = 40;
+            }
+            //绘制小球
+            render(){
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        
+        //会动的小球，继承
+
+        class MoveBall extends Ball{
+            constructor(x,y,color){
+                super(x,y,color);
+                //量的变化
+                this.dx = Math.round(Math.random()*10-5);
+                this.dy = Math.round(Math.random() * 10 - 5);
+                this.dr = Math.round(Math.random() * 2 + 1 )
+            }
+
+            upDate(){
+                this.x += this.dx;
+                this.y += this.dy;
+                this.r -= this.dr;
+                if(this.r<=0){
+                    this.r = 0;
+                }
+            }
+        }
+
+        //实例化小球
+        let ballArr = [];
+        let colorArr = ['red','orange','brown','green','purple','pink','deeppink','yellow','lightblue'];
+
+        //监听鼠标移动
+        canvas.addEventListener('mousemove',function(e){
+            let i = Math.round(Math.random()*(colorArr.length-1))
+            // let e = e || window.event;
+            let ball = new MoveBall(e.offsetX,e.offsetY,colorArr[i]);
+            ballArr.push(ball);
+        })
+
+        //开启定时器
+        setInterval(function(){
+            //清频
+            ctx.clearRect(0,0,canvas.width,canvas.height)
+            for(let i=0; i<ballArr.length; i++){
+                ballArr[i].render();
+                ballArr[i].upDate();
+            }
+        },50)
+    </script>
+</body>
+
+</html>
