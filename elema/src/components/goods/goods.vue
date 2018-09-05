@@ -1,14 +1,14 @@
 <template>
     <div class="goods">
-        <div class="menu-wrapper">
+        <div class="menu-wrapper" ref="menuWrapper">
             <ul>
-                <li v-for="(goods,index) in goods" :key="index" class="menu-item"><span v-if="goods.type>0" :class="getType(goods.type)" class="icon">
+                <li v-for="(goods,index) in goods" :key="index" class="menu-item" :class="{'current':currentIndex === index}" @click="selectMenu(index,$event)"><span v-if="goods.type>0" :class="getType(goods.type)" class="icon">
                     </span><span class="text border-1px">{{goods.name}}</span></li>
             </ul>
         </div>
-        <div class="foods-wrapper">
+        <div class="foods-wrapper" ref="foodsWrapper">
             <ul>
-                <li v-for="(item,index) in goods" :key="index" class="food-list">
+                <li v-for="(item,index) in goods" :key="index" class="food-list food-list-hook">
                     <h1 class="title">{{item.name}}</h1>
                     <ul>
                         <li v-for="(food,index) in item.foods" :key="index" class="food-item border-1px">
@@ -19,12 +19,13 @@
                                 <h2 class="name">{{food.name}}</h2>
                                 <p class="desc">{{food.description}}</p>
                                 <div class="extra">
-                                    <span class="count">月售{{food.sellCount}}份</span>
-                                    <span>好评率{{food.rating}}%</span>
+                                    <span class="count">月售{{food.sellCount}}份</span><span>好评率{{food.rating}}%</span>
                                 </div>
                                 <div class="price">
-                                    <span class="now">￥{{food.price}}</span>
-                                    <span v-show="food.oldPrice" class="old">￥{{food.oldPrice}}</span>
+                                    <span class="now">￥{{food.price}}</span><span v-show="food.oldPrice" class="old">￥{{food.oldPrice}}</span>
+                                </div>
+                                <div class="cartcontrol-wrapper">
+                                    <cartcontrol :food="food"></cartcontrol>
                                 </div>
                             </div>
                         </li>
@@ -32,9 +33,13 @@
                 </li>
             </ul>
         </div>
+        <shopcar :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice" :selectFoods="selectFoods"></shopcar>
     </div>
 </template>
 <script>
+import BScroll from "better-scroll";
+import shopcar from '../shopcar/shopcar';
+import cartcontrol from '../cartcontrol/cartcontrol'
 export default{
     name:"goods",
     props:{
@@ -42,25 +47,90 @@ export default{
             type:Object
         }
     },
+    components:{
+        shopcar,
+        cartcontrol
+    },
     data(){
         return{
             goods:[],
             type:['decrease','discount','special','invoice','guarantee'],
+            listHeight:[],
+            scrollY: 0,
         }
     },
     created(){
         this.$axios.get('/api/goods')
                     .then(res => {
-                        this.goods = res.data.data; 
+                        this.goods = res.data.data;
+                        this.$nextTick(() => {
+                            this._initScroll();
+                            this._calculateHeight()
+                        }) 
+                        
                     })
                     .catch(err => {
                         console.log(err);
                     })
     },
+    computed: {
+        selectFoods() {
+            let foods = []
+           this.goods.forEach( (good) => {
+               good.foods.forEach( (food) => {
+                   if(food.count){
+                       foods.push(food)
+                   }
+               })
+           }) 
+           return foods
+        },
+      currentIndex(){
+          for( let i=0; i<this.listHeight.length; i++){
+              let height1 = this.listHeight[i];
+              let height2 = this.listHeight[i+1];
+              if(!height2 || (this.scrollY>=height1 && this.scrollY < height2)){
+                  return i
+              }
+          }
+          return 0;
+      }  
+    },
     methods:{
+        selectMenu(index,event) {
+            if(!event._constructed){
+                return;
+            }
+            let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');          
+            let el = foodList[index];
+            this.foodsScroll.scrollToElement(el,300)
+        },
         getType(num){
                 return this.type[num];
             },
+        _initScroll() {
+            this.menuScroll = new BScroll(this.$refs.menuWrapper,{
+                click: true
+            });
+            this.foodsScroll = new BScroll(this.$refs.foodsWrapper,{
+                probeType: 3,
+                click: true
+            });
+
+            this.foodsScroll.on('scroll',(pos) => {
+                this.scrollY =Math.abs(Math.round(pos.y));
+            })
+        },
+
+        _calculateHeight() {
+            let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
+            let height = 0;
+            this.listHeight.push(height);
+            for( let i=0; i<foodList.length; i++){
+                height += foodList[i].clientHeight;
+                this.listHeight.push(height);
+            } 
+        }
     }
 }
 </script>
@@ -83,6 +153,14 @@ export default{
                 height 54px
                 line-height 14px
                 padding 0 12px
+                &.current
+                    position relative
+                    margin-top -1px
+                    z-index 10
+                    background #ffffff
+                    font-weight 700
+                    .text
+                        border none
                 .icon
                     vertical-align -100%
                     display inline-block
@@ -141,6 +219,7 @@ export default{
                         font-size 10px
                         color rgb(147,153,159)
                     .desc
+                        line-height 12px
                         margin-bottom 8px
                     .extra
                         &.count
@@ -156,6 +235,10 @@ export default{
                             text-decoration line-through
                             font-size 10px
                             color rgb(147,153,159)
+                    .cartcontrol-wrapper
+                        position absolute
+                        right 0
+                        bottom 12px
 
 
 
