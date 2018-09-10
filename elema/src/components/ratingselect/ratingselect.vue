@@ -1,15 +1,13 @@
 <template>
-    <div>
-        <div class="ratingselect">
-            <div class="rating-type">
-                <span @click="select(2,$event)" class="block positive" :class="{'active':seletType===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
-                <span @click="select(0,$event)" class="block positive" :class="{'active':seletType===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
-                <span @click="select(1,$event)" class="block negative" :class="{'active':seletType===1}">{{desc.negative}}<span class="count">{{negatives.length}}</span></span>
-            </div>
-            <div @click="toggleContent($event)" class="switch" :class="{'on':onlyContent}">
-                <i class="icon-check_circle"></i>
-                <span class="text">只看有内容的评价</span>
-            </div>
+    <div class="ratingselect">
+        <div class="rating-type">
+            <span @click="select(2,$event)" class="block positive" :class="{'active':selectType===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
+            <span @click="select(0,$event)" class="block positive" :class="{'active':selectType===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
+            <span @click="select(1,$event)" class="block negative" :class="{'active':selectType===1}">{{desc.negative}}<span class="count">{{negatives.length}}</span></span>
+        </div>
+        <div @click="toggleContent($event)" class="switch" :class="{'on':onlyContent}">
+            <i class="icon-check_circle"></i>
+            <span class="text">只看有内容的评价</span>
         </div>
     </div>
 </template>
@@ -26,7 +24,7 @@
                     return[]
                 }
             },
-            seletType:{
+            selectType:{
                 type:Number,
                 default:ALL
             },
@@ -50,16 +48,14 @@
                 if( !event._constructed){
                     return
                 }
-                this.seletType = type
-                this.$emit('ratingTypeSelect',type)
+                this.$emit('select',type)
             },
 
             toggleContent(event){
                if( !event._constructed){
                     return
                 }
-                this.onlyContent = !onlyContent;
-                this.$emit('contentToggle',this.onlyContent) 
+                this.$emit('toggle') 
             }
         },
         computed: {

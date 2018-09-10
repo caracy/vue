@@ -1,8 +1,6 @@
 <template>
-    <div>
-        <div class="star" :class="starType">
-            <span v-for="(itemClass,index) in itemClasses" :class="itemClass" class="star-item" :key="index"></span>
-        </div>
+    <div class="star" :class="starType">
+        <span v-for="(itemClass,index) in itemClasses" :class="itemClass" class="star-item" :key="index"></span>
     </div>
 </template>
 <script>
@@ -73,8 +71,8 @@
             .star-item
                 width 15px
                 height 15px 
-                margin-right 16px
-                background-size 15px 15px
+                margin-right 6px
+                background-size 15px 15px;
                 &:last-child
                     margin-right 0
                 &.on

@@ -81,15 +81,15 @@ export default{
     },
     computed: {
         selectFoods() {
-            let foods = []
+            let foodss = []
            this.goods.forEach( (good) => {
                good.foods.forEach( (food) => {
                    if(food.count){
-                       foods.push(food)
+                       foodss.push(food)
                    }
                })
            }) 
-           return foods
+           return foodss
         },
       currentIndex(){
           for( let i=0; i<this.listHeight.length; i++){

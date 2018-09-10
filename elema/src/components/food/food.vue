@@ -33,21 +33,21 @@
                 <split></split>
                 <div class="rating">
                     <h1 class="title">商品评价</h1>
-                    <ratingselect :selectType="selectType" :onlyContent="onlyContent" :desc="desc" :ratings="food.ratings"></ratingselect>
+                    <ratingselect @select="selectRating" @toggle="toggleContent" :selectType="selectType" :onlyContent="onlyContent" :desc="desc" :ratings="food.ratings"></ratingselect>
                     <div class="rating-wrapper">
-                        <ul v-show="food.ratings && food.ratings.length">
-                            <li class="rating-item border-1px" v-for="(rating,index) in food.ratings" :key="index">
+                        <ul v-show="food.ratings">
+                            <li v-show="needShow(rating.rateType,rating.text)" class="rating-item border-1px" v-for="(rating,index) in food.ratings" :key="index">
                                 <div class="user">
                                     <span class="name">{{rating.username}}</span>
                                     <img :src="rating.avatar" alt="" width="12" height="12" class="avatar">
                                 </div>
-                                <div class="time">{{rating.rateTime}}</div>
+                                <div class="time">{{rating.rateTime | formaDate(rating.rateTime)}}</div>
                                 <p class="text">
                                     <span :class="{'icon-thumb_up':rating.rateType===0,'icon-thumb_down':rating.rateType===1}"></span>{{rating.text}}
                                 </p>
                             </li>
                         </ul>
-                        <div class="no-rating" v-show="!food.ratings && !food.ratings.length"></div>
+                        <div class="no-rating" v-show="!food.ratings"></div>
                     </div>
                 </div>
             </div>
@@ -57,6 +57,7 @@
 <script>
 import Vue from 'vue'
 import BScroll from 'better-scroll';
+import {formaDate} from '../../common/js/date'
 import cartcontrol from '../cartcontrol/cartcontrol'
 import split from "../split/split"
 import ratingselect from '../ratingselect/ratingselect'
@@ -107,13 +108,45 @@ import ratingselect from '../ratingselect/ratingselect'
                     return
                 }
                 Vue.set(this.food,'count',1)
+            },
+
+            needShow(type,text){
+                if(this.onlyContent && !text){
+                    return false
+                }
+                if(this.selectType === ALL){
+                    return true
+                }else{
+                    return type === this.selectType
+                }
+            },
+            
+            selectRating(type){
+                this.selectType = type;
+                this.$nextTick( () => {
+                    this.scroll.refresh()
+                })
+            },
+            toggleContent(){
+                this.onlyContent = !this.onlyContent;
+                this.$nextTick( () => {
+                    this.scroll.refresh()
+                })
+            },
+        },
+        filters: {
+            formaDate(time){
+                let date = new Date(time);
+                return formaDate(date,'yyyy-MM-dd hh:mm')
             }
         },
         components: {
             cartcontrol,
             split,
             ratingselect
-        }
+        },
+
+        
     }
 </script>
 <style lang="stylus">
