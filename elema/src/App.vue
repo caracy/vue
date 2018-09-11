@@ -13,24 +13,27 @@
       </div>
     </div>
     <div>
-      <router-view :seller="seller"></router-view>
+      <keep-alive>
+        <router-view :seller="seller"></router-view>
+      </keep-alive>
     </div>
   </div>
 </template>
 
 <script>
 import Header from './components/header/header';
+import {urlParse} from './common/js/util'
 export default {
   name: 'App',
-  data() {
+    data() {
     return{
-      seller:{}
+      seller:{},
     }
   },
   created() {
     this.$axios.get('/api/seller')
                 .then(res => {
-                  this.seller = res.data.data;
+                  this.seller = Object.assign({},this.seller,res.data.data);  
                 })
                 .catch(err => {
                   console.log(err)
